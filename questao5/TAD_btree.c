@@ -43,6 +43,41 @@ void insert(BTree* tree, Node* node, int data){
     insert_non_full(tree->root, data); // inicia a inserção a partir da raiz atual
 }
 
+void insert_non_full(Node* node, int data){
+
+    int i = node->numChaves - 1;
+
+    if(node->folha){ // se for folha, o valor será inserido diretamente nesse no
+
+        while(i >= 0 && node->chaves[i] > data){
+            node->chaves[i+1] = node->chaves[i]; // desloca as chaves maiores para abrir espaço
+            i--;
+        }
+
+        node->chaves[i+1] = data; // insere o valor na posição correta
+        node->numChaves++; // atualiza a quantidade de chaves
+
+        return;
+    }
+
+    // se não for folha, precisa encontrar em qual filho o valor deve entrar
+    while(i >= 0 && node->chaves[i] > data){
+        i--;
+    }
+
+    i++; // ajusta o índice para acessar o filho correspondente
+
+    if(is_full(node->filhos[i])){ 
+        split_node(node,); // divide o filho
+
+        if(data > node->chaves[i]){
+            i++; // se o valor for maior que a mediana, vai pro filho da direita
+        }
+    }
+
+    insert_non_full(node->filhos[i], data);
+}
+
 void split_node(Node* node){}
 
 //quando um nó chega no tamanho limite(6), ele terá que splitar, pra isso, deve-se pegar
