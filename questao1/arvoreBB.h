@@ -15,9 +15,7 @@ typedef struct stTree treeHeader;
  * dataSize é o tamanho, em bytes, de cada elemento armazenado.
  */
 treeHeader *createTree(
-    int (*compareFunction)(void *arg1, void *arg2),
-    size_t dataSize
-);
+    int (*compareFunction)(void *arg1, void *arg2));
 
 void destroyTree(treeHeader *tree);
 
@@ -26,5 +24,11 @@ void insertData(treeHeader *tree, void *dataPtr);
 void removeElement(treeHeader *tree, void *dataPtr);
 
 int getTreeHeight(treeHeader *tree);
+
+void traverseInOrder(treeHeader *tree, void (*process)(void *dataPtr));
+
+void traversePreOrder(treeHeader *tree, void (*process)(void *dataPtr));
+
+void traversePostOrder(treeHeader *tree, void (*process)(void *dataPtr));
 
 #endif /* BINARY_TREE_H */

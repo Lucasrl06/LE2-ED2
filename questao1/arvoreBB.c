@@ -15,12 +15,14 @@ typedef struct stNode {
 typedef struct stTree {
     node* root;
     int (*compareFunction) (void* argu1,void* argu2);
-    size_t dataSize;
 } treeHeader;
 
 static void _freeAllNodesAndTheirData(node* root);
+static void _traverseInOrder(node* localRoot, void (*process)(void*));
+static void _traversePreOrder(node* localRoot, void (*process)(void*));
+static void _traversePostOrder(node* localRoot, void (*process)(void*));
 static node* _createNode(treeHeader* tree, void* dataPtr);
-static int _fillNodeData(treeHeader* tree, node* emptyNode, void* dataPtr);
+static int _fillNodeData(node* emptyNode, void* dataPtr);
 
 static node* _findParentNode(
     int compareFunction(void*, void*),
@@ -41,7 +43,7 @@ static node* findNodeAndParent(
 );
 
 void _deleteNode(node* nodeToDelete);
-int _getNumberOfSons(node* localRoot);
+static int _getNumberOfSons(node* localRoot);
 void _removeNodeWithNoSons(treeHeader*, node*, node*);
 void _removeNodeWithOneSon(treeHeader*, node*, node*);
 void removeNodeWithTwoSons(treeHeader*, node*, node*);
@@ -49,14 +51,14 @@ int _isTheRightSon(node*, node*);
 int _isTheLeftSon(node*, node*);
 int _isTreeRoot(treeHeader*, node*);
 void _removeRoot(treeHeader*);
+static int _getHeightOfBiggestSubtree(node* localRoot);
 
-treeHeader* createTree (int (*compareFunction) (void* arg1,void* arg2),size_t dataSize){
-    if (!compareFunction || dataSize == 0) return NULL;
+treeHeader* createTree (int (*compareFunction) (void* arg1,void* arg2)){
+    if (!compareFunction) return NULL;
     treeHeader* tree = (treeHeader*) malloc(sizeof(treeHeader));
     if(!tree) return NULL;
     tree->root = NULL;
     tree->compareFunction = compareFunction;
-    tree->dataSize = dataSize;
     return tree;
 }
 
@@ -66,11 +68,47 @@ void destroyTree(treeHeader* tree){
     free(tree);
 }
 
+void traverseInOrder(treeHeader* tree, void (*process)(void*)){
+    if(!tree || !process) return;
+    _traverseInOrder(tree->root, process);
+}
+
+void traversePreOrder(treeHeader* tree, void (*process)(void*)){
+    if(!tree || !process) return;
+    _traversePreOrder(tree->root, process);
+}
+
+void traversePostOrder(treeHeader* tree, void (*process)(void*)){
+    if(!tree || !process) return;
+    _traversePostOrder(tree->root, process);
+}
+
 static void _freeAllNodesAndTheirData(node* root){
     if(!root) return;
     _freeAllNodesAndTheirData(root->left);
     _freeAllNodesAndTheirData(root->right);
     _deleteNode(root);
+}
+
+static void _traverseInOrder(node* localRoot, void (*process)(void*)){
+    if(!localRoot || !process) return;
+    _traverseInOrder(localRoot->left, process);
+    process(localRoot->data);
+    _traverseInOrder(localRoot->right, process);
+}
+
+static void _traversePreOrder(node* localRoot, void (*process)(void*)){
+    if(!localRoot || !process) return;
+    process(localRoot->data);
+    _traversePreOrder(localRoot->left, process);
+    _traversePreOrder(localRoot->right, process);
+}
+
+static void _traversePostOrder(node* localRoot, void (*process)(void*)){
+    if(!localRoot || !process) return;
+    _traversePostOrder(localRoot->left, process);
+    _traversePostOrder(localRoot->right, process);
+    process(localRoot->data);
 }
 
 void insertData(treeHeader *tree,void* dataPtr){
@@ -103,17 +141,15 @@ static node* _findParentNode(int compareFunction(void* arg1,void* arg2),node* lo
 static node* _createNode(treeHeader* tree,void* dataPtr){
     node* newNode = (node*) malloc(sizeof(node));
     if(!newNode) return NULL;
-    int result = _fillNodeData(tree,newNode,dataPtr);
+    int result = _fillNodeData(newNode,dataPtr);
     if(result == SUCCESS) return newNode;
     else if (result == FAIL){
         free(newNode);
     }
     return NULL;
 }
-static int _fillNodeData(treeHeader *tree,node *emptyNode,void *dataPtr){
-    emptyNode->data = malloc(tree->dataSize);
-    if(!emptyNode->data) return FAIL;
-    memcpy(emptyNode->data,dataPtr,tree->dataSize);
+static int _fillNodeData(node *emptyNode,void *dataPtr){
+    emptyNode->data = dataPtr;
     emptyNode->left = NULL;
     emptyNode->right = NULL;
     return SUCCESS;
@@ -285,9 +321,7 @@ int getTreeHeight(treeHeader *tree){
 
 static int _getHeightOfBiggestSubtree(node *localRoot){
     if(!localRoot) return 0;
-    return max(_getHeightOfBiggestSubtree(localRoot->left),_getHeightOfBiggestSubtree(localRoot->right)) + 1;
-}
-
-int max (int val1,int val2){
-    return val1 > val2 ? val1 : val2;
+    int leftHeight = _getHeightOfBiggestSubtree(localRoot->left);
+    int rightHeight = _getHeightOfBiggestSubtree(localRoot->right);
+    return (leftHeight > rightHeight ? leftHeight : rightHeight) + 1;
 }
