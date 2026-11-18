@@ -17,6 +17,8 @@ typedef struct BTree {
 BTree* create_tree(){}
 //cria a arvore :D
 
+Node* create_node(){}
+
 
 void insert(BTree* tree, Node* node, int data){
     // verifica se a árvore está vazia
@@ -81,6 +83,7 @@ void insert_non_full(Node* node, int data){
 void split_node(Node* node){}
 
 //quando um nó chega no tamanho limite(6), ele terá que splitar, pra isso, deve-se pegar
+
 
 void remove_data(){}
 // vai usar search_node pra procurar o nó do dado que procura, se achar, 
